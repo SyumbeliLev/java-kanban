@@ -1,8 +1,7 @@
-import Tests.Test;
+import tests.Test;
 public class Main {
 
     public static void main(String[] args) {
-        Test test = new Test();
-        test.allTest();
+        Test.allTest();
     }
 }

@@ -1,40 +1,34 @@
-package Model;
+package model;
 
 public class Task {
     private String title;
-    private String Description;
+    private String description;
     private int id;
-    private progress status;
+    private Progress status;
 
-    public enum progress {
-        NEW,
-        IN_PROGRESS,
-        DONE
+    public Task(String title, String description, Progress status, int id) {
+        this.title = title;
+        this.description = description;
+        this.status = status;
     }
+
+
 
     @Override
     public String toString() {
         return
                 getClass() + "{" +
                         "title = '" + title + '\'' +
-                        ", Description = '" + Description + '\'' +
+                        ", description = '" + description + '\'' +
                         ", id = " + id +
                         ", status = " + status +
                         '}';
     }
-
-    public Task(String title, String description, int id, progress status) {
-        this.title = title;
-        Description = description;
-        this.id = id;
-        this.status = status;
-    }
-
-    public progress getStatus() {
+    public Progress getStatus() {
         return status;
     }
 
-    public void setStatus(progress status) {
+    public void setStatus(Progress status) {
         this.status = status;
     }
 

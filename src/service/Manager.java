@@ -28,7 +28,7 @@ public class Manager {
     }
 
     public Task getByIdTask(int id) {  /* 2.3 Получение по идентификатору.*/
-        return taskHashMap.getOrDefault(id, null);
+        return taskHashMap.get(id);
     }
 
     public void addTask(Task task) { /* 2.4 Создание tasks задачи*/
@@ -70,7 +70,7 @@ public class Manager {
         return epic.getId();
     }
 
-    private Epic setStatusEpic(Epic epic) {
+    private void setStatusEpic(Epic epic) {
         int statusNew = 0;
         int statusDone = 0;
 
@@ -79,6 +79,9 @@ public class Manager {
 
             if (subtack.getStatus() == Progress.NEW) {
                 statusNew++;
+            } else if (subtack.getStatus() == Progress.IN_PROGRESS) {
+                epic.setStatus(Progress.IN_PROGRESS);
+                return;
             } else if (subtack.getStatus() == Progress.DONE) {
                 statusDone++;
             }
@@ -92,11 +95,10 @@ public class Manager {
         } else {
             epic.setStatus(Progress.IN_PROGRESS);
         }
-        return epic;
+
     }
 
     public void updateEpic(Epic epic) { /* 2.5 Обновление Epic*/
-        setStatusEpic(epic);
         epicHashMap.put(epic.getId(), epic);
     }
 
@@ -106,11 +108,9 @@ public class Manager {
             subtackHashMap.remove(idSub);
         }
         epicHashMap.remove(id);
-
-
     }
 
-    public ArrayList<Subtack> getSubtackByEpic(int id) { /*Получение списка всех подзадач определённого эпика.*/
+    public ArrayList<Subtack> getSubtackEpic(int id) { /*Получение списка всех подзадач определённого эпика.*/
         Epic epic = epicHashMap.get(id);
         ArrayList<Subtack> list = new ArrayList<>();
         for (Integer idSub : epic.getSubtasksId()) {
@@ -125,6 +125,11 @@ public class Manager {
     }
 
     public void removeAllSubtack() { /* 2.2 Удаление всех Subtack задач.*/
+        /*
+        for (Epic value : epicHashMap.values()) {
+            value.removeListSubtasks();                        Так нужно сдеелать, если пробегаться циклом не по ключам, а сразу по значениям, у мапы  есть метод values()
+            setStatusEpic(epicHashMap.get(value.getId()));
+        }*/
         for (Integer KeyEpic : epicHashMap.keySet()) {
             Epic epic = epicHashMap.get(KeyEpic);
             epic.removeListSubtasks();
@@ -134,7 +139,7 @@ public class Manager {
     }
 
     public Subtack getByIdSubtack(int id) {  /* 2.3 Получение по идентификатору Subtack.*/
-        return subtackHashMap.getOrDefault(id, null);
+        return subtackHashMap.get(id);
     }
 
     public void addSubtack(Subtack subtack) { /* 2.4 Создание Subtack задачи*/
@@ -143,7 +148,7 @@ public class Manager {
 
         Epic epic = epicHashMap.get(subtack.getEpicId());
         if (subtack.getEpicId() == epic.getId()) {
-            epic.setSubtasks(subtack.getId());
+            epic.addSubtask (subtack.getId());
         }
         subtackHashMap.put(subtack.getId(), subtack);
         setStatusEpic(epic);
@@ -160,14 +165,8 @@ public class Manager {
     public void removeSubtackById(int id) { /* 2.6 Удаление по идентификатору Subtack.*/
 
         if (subtackHashMap.containsKey(id)) {
-            Subtack subtack = subtackHashMap.get(id);
-            int epicId = subtack.getEpicId();
-
-            Epic epic = epicHashMap.get(epicId);
-            epic.removeSubtaskToList(id);
-            setStatusEpic(epic);
-
             subtackHashMap.remove(id);
+
         }
     }
 }

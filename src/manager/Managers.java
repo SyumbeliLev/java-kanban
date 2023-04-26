@@ -5,14 +5,17 @@ import manager.historyManagers.InMemoryHistoryManager;
 import manager.taskManagers.InMemoryTaskManager;
 import manager.taskManagers.TaskManager;
 
-public class Managers{
-
-    static TaskManager taskManager =  new InMemoryTaskManager();
-    static HistoryManager historyManager = new InMemoryHistoryManager();
-    public static HistoryManager getDefaultHistory(){
-      return historyManager;
+public class Managers {
+    private Managers() {
     }
-    public static TaskManager getDefault(){
+
+    public static HistoryManager getDefaultHistory() {
+        HistoryManager historyManager = new InMemoryHistoryManager();
+        return historyManager;
+    }
+
+    public static TaskManager getDefault() {
+        TaskManager taskManager = new InMemoryTaskManager();
         return taskManager;
     }
 }

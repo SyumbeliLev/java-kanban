@@ -1,8 +1,8 @@
 package model;
 
 public class Task {
-    private String title;
-    private String description;
+    private final String title;
+    private final String description;
     private int id;
     private Progress status;
 
@@ -11,7 +11,6 @@ public class Task {
         this.description = description;
         this.status = status;
     }
-
 
 
     @Override
@@ -24,6 +23,7 @@ public class Task {
                         ", status = " + status +
                         '}';
     }
+
     public Progress getStatus() {
         return status;
     }

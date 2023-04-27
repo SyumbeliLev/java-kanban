@@ -5,9 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import manager.Managers;
 import manager.historyManagers.HistoryManager;
-
-import static manager.Managers.getDefaultHistory;
 
 import model.Epic;
 import model.Progress;
@@ -20,7 +19,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, Task> taskHashMap = new HashMap<>();
     private final Map<Integer, Epic> epicHashMap = new HashMap<>();
     private final Map<Integer, Subtack> subtackHashMap = new HashMap<>();
-    HistoryManager historyManager = getDefaultHistory();
+    private final HistoryManager historyManager = Managers.getDefaultHistory();
 
     @Override
     public List<Task> getHistory() {

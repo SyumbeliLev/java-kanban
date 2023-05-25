@@ -1,9 +1,6 @@
 package manager.taskManagers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import manager.Managers;
 import manager.historyManagers.HistoryManager;
@@ -15,11 +12,14 @@ import model.Task;
 
 public class InMemoryTaskManager implements TaskManager {
 
+
     private int nextId = 1;
+
     private final Map<Integer, Task> taskHashMap = new HashMap<>();
     private final Map<Integer, Epic> epicHashMap = new HashMap<>();
     private final Map<Integer, Subtack> subtackHashMap = new HashMap<>();
     private final HistoryManager historyManager = Managers.getDefaultHistory();
+
 
     @Override
     public List<Task> getHistory() {
@@ -62,6 +62,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeTaskById(int id) { /* 2.6 Удаление по идентификатору.*/
         taskHashMap.remove(id);
+        historyManager.remove(id);
     }
 
     /*методы Epic*/
@@ -128,8 +129,10 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeEpicById(int id) { /* 2.6 Удаление по идентификатору Epic.*/
         Epic epic = epicHashMap.remove(id);
+        historyManager.remove(id);
         for (Integer idSub : epic.getSubtasksId()) {
             subtackHashMap.remove(idSub);
+            historyManager.remove(idSub);
         }
     }
 
@@ -190,6 +193,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeSubtackById(int id) { /* 2.6 Удаление по идентификатору Subtack.*/
+        historyManager.remove(id);
         if (subtackHashMap.containsKey(id)) {
             Subtack subtack = subtackHashMap.remove(id);
             int epicId = subtack.getEpicId();

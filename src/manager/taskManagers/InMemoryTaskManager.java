@@ -73,11 +73,12 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeAllEpic() { /* 2.2 Удаление всех Epic задач.*/
+        removeAllSubtack();
         for (Integer epicId : epicHashMap.keySet()) {
             historyManager.remove(epicId);
         }
         epicHashMap.clear();
-        subtackHashMap.clear();
+
     }
 
     @Override
@@ -131,11 +132,14 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeEpicById(int id) { /* 2.6 Удаление по идентификатору Epic.*/
-        Epic epic = epicHashMap.remove(id);
-        historyManager.remove(id);
-        for (Integer idSub : epic.getSubtasksId()) {
-            subtackHashMap.remove(idSub);
-            historyManager.remove(idSub);
+        if (!epicHashMap.isEmpty()) {
+            Epic epic = epicHashMap.remove(id);
+            historyManager.remove(id);
+
+            for (Integer idSub : epic.getSubtasksId()) {
+                subtackHashMap.remove(idSub);
+                historyManager.remove(idSub);
+            }
         }
     }
 

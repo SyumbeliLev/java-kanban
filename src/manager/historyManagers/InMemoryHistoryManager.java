@@ -18,22 +18,13 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void remove(int id) {
         history.removeNode(historyMap.remove(id));
-        historyMap.remove(id);
-
     }
 
     @Override
     public void add(Task task) {
         if (task != null) {
-            Node node = history.linkLast(task);
-
-            if (historyMap.containsKey(task.getId())) {
-                history.removeNode(historyMap.get(task.getId()));
-                historyMap.remove(task.getId());
-            }
-
-            historyMap.put(task.getId(), node);
-
+            remove(task.getId());   //Отдельно спасибо, за рабор этого метода, так гараздо лучше! P.S. потом удалю этот комент :D
+            historyMap.put(task.getId(), history.linkLast(task));
         }
     }
 
@@ -42,7 +33,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         private Node<T> head;
         private Node<T> tail;
-        private int size;
+        private int size = 0;
 
 
         public Node<T> linkLast(T element) {
@@ -73,9 +64,12 @@ public class InMemoryHistoryManager implements HistoryManager {
             }
             if (node == head) {
                 head = node.next;
+                if (this.size > 1) head.prev = null;
             }
             if (node == tail) {
                 tail = node.prev;
+                if (this.size > 1) tail.next = null;
+
             }
             if (node.prev != null) {
                 node.prev.next = node.next;
@@ -84,7 +78,6 @@ public class InMemoryHistoryManager implements HistoryManager {
                 node.next.prev = node.prev;
             }
             size--;
-
         }
 
         public int size() {

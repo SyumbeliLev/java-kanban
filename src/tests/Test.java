@@ -35,6 +35,7 @@ public class Test {
 
         taskManager.getSubtackById(2);
         taskManager.getEpicById(5);
+
         System.out.println(taskManager.getHistory());
         taskManager.removeEpicById(1);
         System.out.println(taskManager.getHistory());

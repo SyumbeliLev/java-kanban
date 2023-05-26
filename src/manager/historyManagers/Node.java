@@ -1,7 +1,5 @@
 package manager.historyManagers;
 
-import model.Task;
-
 class Node<E> {
     public E data;
     public Node<E> next;
@@ -13,7 +11,5 @@ class Node<E> {
         this.prev = prev;
     }
 
-    public Node(E e) {
-    }
 }
 

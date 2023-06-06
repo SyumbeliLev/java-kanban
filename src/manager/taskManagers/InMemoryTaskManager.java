@@ -149,6 +149,7 @@ public class InMemoryTaskManager implements TaskManager {
         ArrayList<Subtack> list = new ArrayList<>();
         for (Integer idSub : epic.getSubtasksId()) {
             list.add(subtackHashMap.get(idSub));
+            historyManager.add(subtackHashMap.get(idSub));
         }
         return list;
     }
@@ -211,6 +212,17 @@ public class InMemoryTaskManager implements TaskManager {
             Epic epic = epicHashMap.get(epicId);
             epic.removeSubtask(id);
             setStatusEpic(epic);
+        }
+    }
+
+    public void addListHistory(List<Integer> id) {
+        for (Integer idTask : id) {
+            if (epicHashMap.containsKey(idTask)) {
+                historyManager.add(epicHashMap.get(idTask));
+            } else if (subtackHashMap.containsKey(idTask)) {
+                historyManager.add(subtackHashMap.get(idTask));
+            } else
+                historyManager.add(taskHashMap.get(idTask));
         }
     }
 }

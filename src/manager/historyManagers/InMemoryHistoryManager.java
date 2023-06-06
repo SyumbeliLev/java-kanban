@@ -15,6 +15,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         return (List<Task>) history.getTasks();
     }
 
+
     @Override
     public void remove(int id) {
         history.removeNode(historyMap.remove(id));

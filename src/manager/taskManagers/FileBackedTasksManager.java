@@ -11,8 +11,9 @@ import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
-    private final static String FIELDS_HEADINGS_CSV = "id,type,name,status,description,epic\n";
-    private File file;
+    private String headCsv = "id,type,name,status,description,epic";
+    private final File file;
+
     public FileBackedTasksManager(File file) {
         this.file = file;
     }
@@ -22,34 +23,35 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             Files.deleteIfExists(file.toPath());
             Files.createFile(file.toPath());
         } catch (IOException e) {
-            throw new ManagerSaveException("Не удалось создать файл");
+            throw new ManagerSaveException("Не удалось создать файл" + e);
         }
-        try (Writer fileWriter = new FileWriter(file, StandardCharsets.UTF_8)) {
-            fileWriter.write(FIELDS_HEADINGS_CSV);
+        try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
+            fileWriter.write(headCsv + "\n");
 
             for (Task task : getTaskList()) {
-                fileWriter.write(toString(task));
+                fileWriter.write(toString(task) + "\n");
             }
 
             for (Epic epic : getEpicList()) {
-                fileWriter.write(toString(epic));
+                fileWriter.write(toString(epic) + "\n");
             }
 
             for (Subtack subtack : getSubtackList()) {
-                fileWriter.write(toString(subtack));
+                fileWriter.write(toString(subtack) + "\n");
             }
 
             fileWriter.write("\n");
-            fileWriter.write(historyToString((HistoryManager) getHistory()));
+            fileWriter.write(historyToString(getHistoryManager())); // не разобрался, как записать в одну ячейку числа через запятую...
 
         } catch (IOException e) {
             throw new ManagerSaveException("Не удалось сохранить в файл ", e);
         }
     }
 
-
     private String toString(Task task) {
+
         String[] allArguments = {String.valueOf(task.getId()), getTaskType(task).toString(), task.getTitle(), task.getStatus().toString(), task.getDescription(), getEpicId(task)};
+
         return String.join(",", allArguments);
     }
 
@@ -89,13 +91,17 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
+    @Override
+    public HistoryManager getHistoryManager() {
+        return super.getHistoryManager();
+    }
+
     private static String historyToString(HistoryManager manager) {
-        List<String> idTask = null;
+        List<String> idTask = new ArrayList<>();
         for (Task task : manager.getHistory()) {
             idTask.add(String.valueOf(task.getId()));
         }
-        String idToString = String.join(",", idTask);
-        return idToString;
+        return String.join(",", idTask);
     }
 
     private static List<Integer> historyFromString(String value) {
@@ -108,25 +114,26 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return historyRestoration;
     }
 
-    private void loadFromFile(File file) {
+    public void loadFromFile(File file) {
         try (BufferedReader fileReader = new BufferedReader(new FileReader(file))) {
-            String line = fileReader.readLine();
+
             while (fileReader.ready()) {
-                if (line.isEmpty()) {
+                String line = fileReader.readLine();
+                if (line.equals(headCsv)) {
+                    continue;
+                } else if (line.equals("")) {
                     break;
                 }
-
                 Task task = fromString(line);
-                switch (getTaskType(task)) {
-                    case TASK:
-                        addTask(task);
-                    case EPIC:
-                        addEpic((Epic) task);
-                    case SUBTASK:
-                        addSubtack((Subtack) task);
+                if (task instanceof Epic) {
+                    addEpic((Epic) task);
+                } else if (task instanceof Subtack) {
+                    addSubtack((Subtack) task);
+                } else {
+                    addTask(task);
                 }
-
             }
+
             String historyLine = fileReader.readLine();
             addListHistory(historyFromString(historyLine));
 
@@ -136,37 +143,28 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
+    public List<Task> getHistory() {
+        return super.getHistory();
+    }
+
+    @Override
     public void addListHistory(List<Integer> id) {
         super.addListHistory(id);
-        save();
     }
 
     @Override
     public List<Task> getTaskList() {
-        List<Task> taskList = super.getTaskList();
-        save();
-        return taskList;
+        return super.getTaskList();
     }
 
     @Override
     public List<Epic> getEpicList() {
-        List<Epic> epicList = super.getEpicList();
-        save();
-        return epicList;
+        return super.getEpicList();
     }
 
     @Override
     public List<Subtack> getSubtackList() {
-        List<Subtack> subtackList = super.getSubtackList();
-        save();
-        return subtackList;
-    }
-
-    @Override
-    public List<Task> getHistory() {
-        List<Task> tasksView = super.getHistory();
-        save();
-        return tasksView;
+        return super.getSubtackList();
     }
 
     @Override
@@ -185,7 +183,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public void addTask(Task task) {
         super.addTask(task);
-        save();
     }
 
     @Override
@@ -215,9 +212,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     @Override
     public int addEpic(Epic epic) {
-        int idEpic = super.addEpic(epic);
-        save();
-        return idEpic;
+        return super.addEpic(epic);
     }
 
     @Override
@@ -256,7 +251,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public void addSubtack(Subtack subtack) {
         super.addSubtack(subtack);
-        save();
     }
 
     @Override

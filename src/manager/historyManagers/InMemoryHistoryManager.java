@@ -8,7 +8,7 @@ import java.util.*;
 public class InMemoryHistoryManager implements HistoryManager {
 
     private final CustomLinkedList<Task> history = new CustomLinkedList<>();
-    private Map<Integer, Node> historyMap = new HashMap<>();
+    private final Map<Integer, Node> historyMap = new HashMap<>();
 
     @Override
     public List<Task> getHistory() {
@@ -24,7 +24,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void add(Task task) {
         if (task != null) {
-            remove(task.getId());   //Отдельно спасибо, за рабор этого метода, так гараздо лучше! P.S. потом удалю этот комент :D
+            remove(task.getId());
             historyMap.put(task.getId(), history.linkLast(task));
         }
     }

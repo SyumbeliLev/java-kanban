@@ -157,7 +157,11 @@ public class InMemoryTaskManager implements TaskManager {
     /*методы Subtack */
     @Override
     public List<Subtack> getSubtackList() { /* 2.1Получение списка Subtack задач*/
+        for (Map.Entry<Integer, Subtack> entry : subtackHashMap.entrySet()) {
+            historyManager.add(entry.getValue());
+        }
         return new ArrayList<>(subtackHashMap.values());
+
     }
 
     @Override
@@ -224,5 +228,9 @@ public class InMemoryTaskManager implements TaskManager {
             } else
                 historyManager.add(taskHashMap.get(idTask));
         }
+    }
+
+    public HistoryManager getHistoryManager() {
+        return historyManager;
     }
 }

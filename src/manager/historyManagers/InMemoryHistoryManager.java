@@ -37,7 +37,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         private int size = 0;
 
 
-        public Node<T> linkLast(T element) {
+        private Node<T> linkLast(T element) {
             final Node<T> oldTail = tail;
             final Node<T> newNode = new Node<>(oldTail, element, null);
             tail = newNode;

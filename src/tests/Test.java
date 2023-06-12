@@ -32,11 +32,12 @@ public class Test {
         manager.addEpic(epic2);
 
 
-        manager.getSubtackList();
+       // manager.getSubtackList();
         manager.getEpicById(1);
+        manager.getSubtackById(2);
 
-        manager2.loadFromFile(file);
-        System.out.println(manager2.getHistory());
+
+        System.out.println(manager.getHistory());
 
 
     }

@@ -11,7 +11,7 @@ import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
-    private String headCsv = "id,type,name,status,description,epic";
+    private static final String HEAD_CSV_ARGUMENTS = "id,type,name,status,description,epic";
     private final File file;
 
     public FileBackedTasksManager(File file) {
@@ -20,13 +20,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     public void save() {
         try {
-            Files.deleteIfExists(file.toPath());
+            if (Files.exists(file.toPath())) {
+                Files.delete(file.toPath());
+            }
             Files.createFile(file.toPath());
         } catch (IOException e) {
             throw new ManagerSaveException("Не удалось создать файл" + e);
         }
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
-            fileWriter.write(headCsv + "\n");
+            fileWriter.write(HEAD_CSV_ARGUMENTS + "\n");
 
             for (Task task : getTaskList()) {
                 fileWriter.write(toString(task) + "\n");
@@ -114,12 +116,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return historyRestoration;
     }
 
-    public void loadFromFile(File file) {
+    public  void loadFromFile(File file) {
         try (BufferedReader fileReader = new BufferedReader(new FileReader(file))) {
 
             while (fileReader.ready()) {
                 String line = fileReader.readLine();
-                if (line.equals(headCsv)) {
+                if (line.equals(HEAD_CSV_ARGUMENTS)) {
                     continue;
                 } else if (line.equals("")) {
                     break;
@@ -205,9 +207,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     @Override
     public Epic getEpicById(int id) {
-        Epic epic = super.getEpicById(id);
-        save();
-        return epic;
+        return super.getEpicById(id);
     }
 
     @Override
@@ -243,9 +243,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public Subtack getSubtackById(int id) {
         Subtack sub = super.getSubtackById(id);
-        save();
         return sub;
-
     }
 
     @Override

@@ -1,6 +1,8 @@
 package tests;
 
+
 import manager.taskManagers.FileBackedTasksManager;
+
 import model.Epic;
 import model.Progress;
 import model.Subtack;
@@ -11,10 +13,8 @@ import java.io.File;
 public class Test {
     public static void allTest() {
 
-        File file = new File("save.csv");   //не разобрался как создавать файл в папе resources
+        File file = new File("save.csv");
         FileBackedTasksManager manager = new FileBackedTasksManager(file);
-        FileBackedTasksManager manager2 = new FileBackedTasksManager(file);
-
 
         Epic epic1 = new Epic("Уборка дома", "в команте");
 
@@ -32,12 +32,12 @@ public class Test {
         manager.addEpic(epic2);
 
 
-       // manager.getSubtackList();
-        manager.getEpicById(1);
-        manager.getSubtackById(2);
+        manager.getEpicById(5);
+        manager.getSubtackById(3);
 
-
-        System.out.println(manager.getHistory());
+        FileBackedTasksManager manager2 = FileBackedTasksManager.loadFromFile(file);
+        manager2.getSubtackById(2);
+        System.out.println(manager2.getHistory());
 
 
     }

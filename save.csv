@@ -1,8 +1,0 @@
-id,type,name,status,description,epic
-1,EPIC,Уборка дома,NEW,в команте,
-5,EPIC,Сходить в магазин,NEW,гастраном,
-2,SUBTASK,Помыть пол,NEW,шваброй,1
-3,SUBTASK,Протереть пыль,NEW,тряпкой,1
-4,SUBTASK,Купить соль,NEW,наличные,1
-
-1,2,3,4

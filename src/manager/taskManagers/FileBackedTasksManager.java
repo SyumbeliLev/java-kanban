@@ -5,30 +5,33 @@ import model.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
-    private static final String HEAD_CSV_ARGUMENTS = "id,type,name,status,description,epic";
+    private static final String headCsv = "id,type,name,status,description,epic";
     private final File file;
 
     public FileBackedTasksManager(File file) {
         this.file = file;
     }
 
+    private void createTask(Task task) {
+        taskHashMap.put(task.getId(), task);
+    }
+
+    private void createEpic(Epic epic) {
+        epicHashMap.put(epic.getId(), epic);
+    }
+
+    private void createSub(Subtack subtack) {
+        subtackHashMap.put(subtack.getId(), subtack);
+    }
+
     public void save() {
-        try {
-            if (Files.exists(file.toPath())) {
-                Files.delete(file.toPath());
-            }
-            Files.createFile(file.toPath());
-        } catch (IOException e) {
-            throw new ManagerSaveException("Не удалось создать файл" + e);
-        }
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
-            fileWriter.write(HEAD_CSV_ARGUMENTS + "\n");
+            fileWriter.write(headCsv + "\n");
 
             for (Task task : getTaskList()) {
                 fileWriter.write(toString(task) + "\n");
@@ -43,15 +46,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
 
             fileWriter.write("\n");
-            fileWriter.write(historyToString(getHistoryManager())); // не разобрался, как записать в одну ячейку числа через запятую...
+            fileWriter.write(historyToString(historyManager));
 
         } catch (IOException e) {
-            throw new ManagerSaveException("Не удалось сохранить в файл ", e);
+            throw new ManagerSaveException("Не удалось записать в файл ", e);
         }
     }
 
-    private String toString(Task task) {
 
+    private String toString(Task task) {
         String[] allArguments = {String.valueOf(task.getId()), getTaskType(task).toString(), task.getTitle(), task.getStatus().toString(), task.getDescription(), getEpicId(task)};
 
         return String.join(",", allArguments);
@@ -72,33 +75,38 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         } else return "";
     }
 
-    private Task fromString(String value) {
+    private static Task fromString(String value) {
         String[] argument = value.split(",");
-        switch (argument[1].toLowerCase()) {
+
+        String taskId = argument[0];
+        String taskType = argument[1];
+        String taskTitle = argument[2];
+        String taskStatus = argument[3];
+        String taskDescription = argument[4];
+
+
+        switch (taskType.toLowerCase()) {
             case "task":
-                Task task = new Task(argument[2], argument[4], Progress.valueOf(argument[3].toUpperCase()));
-                task.setId(Integer.parseInt(argument[0]));
+                Task task = new Task(taskTitle, taskDescription, Progress.valueOf(taskStatus.toUpperCase()));
+                task.setId(Integer.parseInt(taskId));
                 return task;
             case "epic":
-                Epic epic = new Epic(argument[2], argument[4]);
-                epic.setId(Integer.parseInt(argument[0]));
-                epic.setStatus(Progress.valueOf(argument[3].toUpperCase()));
+                Epic epic = new Epic(taskTitle, taskDescription);
+                epic.setId(Integer.parseInt(taskId));
+                epic.setStatus(Progress.valueOf(taskStatus.toUpperCase()));
                 return epic;
             case "subtask":
-                Subtack subtack = new Subtack(argument[2], argument[4], Progress.valueOf(argument[3].toUpperCase()), Integer.parseInt(argument[5]));
-                subtack.setId(Integer.parseInt(argument[0]));
+                String epicIdToSub = argument[5];
+
+                Subtack subtack = new Subtack(taskTitle, taskDescription, Progress.valueOf(taskStatus.toUpperCase()), Integer.parseInt(epicIdToSub));
+                subtack.setId(Integer.parseInt(taskId));
                 return subtack;
             default:
                 return new Task("null", "null", Progress.NEW);
         }
     }
 
-    @Override
-    public HistoryManager getHistoryManager() {
-        return super.getHistoryManager();
-    }
-
-    private static String historyToString(HistoryManager manager) {
+    static String historyToString(HistoryManager manager) {
         List<String> idTask = new ArrayList<>();
         for (Task task : manager.getHistory()) {
             idTask.add(String.valueOf(task.getId()));
@@ -106,7 +114,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return String.join(",", idTask);
     }
 
-    private static List<Integer> historyFromString(String value) {
+    static List<Integer> historyFromString(String value) {
         List<Integer> historyRestoration = new ArrayList<>();
         if (!value.isEmpty()) {
             for (String id : value.split(",")) {
@@ -116,57 +124,37 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return historyRestoration;
     }
 
-    public  void loadFromFile(File file) {
+    public static FileBackedTasksManager loadFromFile(File file) {
+        FileBackedTasksManager manager = new FileBackedTasksManager(file);
         try (BufferedReader fileReader = new BufferedReader(new FileReader(file))) {
 
             while (fileReader.ready()) {
                 String line = fileReader.readLine();
-                if (line.equals(HEAD_CSV_ARGUMENTS)) {
+
+                if (line.equals(headCsv)) {
                     continue;
                 } else if (line.equals("")) {
                     break;
                 }
+
                 Task task = fromString(line);
                 if (task instanceof Epic) {
-                    addEpic((Epic) task);
+                    manager.createEpic((Epic) task);
+
                 } else if (task instanceof Subtack) {
-                    addSubtack((Subtack) task);
+                    manager.createSub((Subtack) task);
                 } else {
-                    addTask(task);
+                    manager.createTask(task);
                 }
             }
 
             String historyLine = fileReader.readLine();
-            addListHistory(historyFromString(historyLine));
+            if (historyLine != null) manager.addListHistory(historyFromString(historyLine));
 
         } catch (IOException e) {
             throw new ManagerSaveException("Не удалось прочитать файл", e);
         }
-    }
-
-    @Override
-    public List<Task> getHistory() {
-        return super.getHistory();
-    }
-
-    @Override
-    public void addListHistory(List<Integer> id) {
-        super.addListHistory(id);
-    }
-
-    @Override
-    public List<Task> getTaskList() {
-        return super.getTaskList();
-    }
-
-    @Override
-    public List<Epic> getEpicList() {
-        return super.getEpicList();
-    }
-
-    @Override
-    public List<Subtack> getSubtackList() {
-        return super.getSubtackList();
+        return manager;
     }
 
     @Override
@@ -185,6 +173,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public void addTask(Task task) {
         super.addTask(task);
+        save();
     }
 
     @Override
@@ -207,12 +196,16 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     @Override
     public Epic getEpicById(int id) {
-        return super.getEpicById(id);
+        Epic epic = super.getEpicById(id);
+        save();
+        return epic;
     }
 
     @Override
     public int addEpic(Epic epic) {
-        return super.addEpic(epic);
+        int idEpic = super.addEpic(epic);
+        save();
+        return idEpic;
     }
 
     @Override
@@ -243,12 +236,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public Subtack getSubtackById(int id) {
         Subtack sub = super.getSubtackById(id);
+        save();
         return sub;
     }
 
     @Override
     public void addSubtack(Subtack subtack) {
         super.addSubtack(subtack);
+        save();
     }
 
     @Override

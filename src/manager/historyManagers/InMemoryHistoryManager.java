@@ -12,7 +12,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public List<Task> getHistory() {
-        return (List<Task>) history.getTasks();
+        return history.getTasks();
     }
 
 
@@ -30,7 +30,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
 
-    public class CustomLinkedList<T> {
+    private class CustomLinkedList<T> {
 
         private Node<T> head;
         private Node<T> tail;
@@ -48,18 +48,19 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
 
 
-        public T getTasks() {
-            Node<T> bufferHead = head;
+        private List<T> getTasks() {
             List<T> returnList = new ArrayList<>();
+            Node<T> bufferHead = head;
+
 
             while (bufferHead != null) {
                 returnList.add(bufferHead.data);
                 bufferHead = bufferHead.next;
             }
-            return (T) returnList;
+            return returnList;
         }
 
-        public void removeNode(Node<T> node) {
+        private void removeNode(Node<T> node) {
             if (node == null) {
                 return;
             }
@@ -81,8 +82,5 @@ public class InMemoryHistoryManager implements HistoryManager {
             size--;
         }
 
-        public int size() {
-            return this.size;
-        }
     }
 }

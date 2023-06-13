@@ -15,10 +15,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     private int nextId = 1;
 
-    private final Map<Integer, Task> taskHashMap = new HashMap<>();
-    private final Map<Integer, Epic> epicHashMap = new HashMap<>();
-    private final Map<Integer, Subtack> subtackHashMap = new HashMap<>();
-    private final HistoryManager historyManager = Managers.getDefaultHistory();
+    protected final Map<Integer, Task> taskHashMap = new HashMap<>();
+    protected final Map<Integer, Epic> epicHashMap = new HashMap<>();
+    protected final Map<Integer, Subtack> subtackHashMap = new HashMap<>();
+    protected final HistoryManager historyManager = Managers.getDefaultHistory();
 
 
     @Override
@@ -40,7 +40,6 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getTaskById(int id) {  /* 2.3 Получение по идентификатору.*/
         Task task = taskHashMap.get(id);
-
         historyManager.add(task);
         return task;
     }
@@ -157,9 +156,6 @@ public class InMemoryTaskManager implements TaskManager {
     /*методы Subtack */
     @Override
     public List<Subtack> getSubtackList() { /* 2.1Получение списка Subtack задач*/
-        for (Map.Entry<Integer, Subtack> entry : subtackHashMap.entrySet()) {
-            historyManager.add(entry.getValue());
-        }
         return new ArrayList<>(subtackHashMap.values());
 
     }
@@ -181,7 +177,6 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Subtack getSubtackById(int id) {  /* 2.3 Получение по идентификатору Subtack.*/
         Subtack subtack = subtackHashMap.get(id);
-
         historyManager.add(subtack);
         return subtack;
     }
@@ -230,7 +225,4 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public HistoryManager getHistoryManager() {
-        return historyManager;
-    }
 }

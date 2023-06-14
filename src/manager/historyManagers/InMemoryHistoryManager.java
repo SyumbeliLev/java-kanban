@@ -31,7 +31,6 @@ public class InMemoryHistoryManager implements HistoryManager {
 
 
     private class CustomLinkedList<T> {
-
         private Node<T> head;
         private Node<T> tail;
         private int size = 0;
@@ -81,6 +80,5 @@ public class InMemoryHistoryManager implements HistoryManager {
             }
             size--;
         }
-
     }
 }

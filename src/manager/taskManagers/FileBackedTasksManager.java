@@ -26,7 +26,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     private void createSub(Subtack subtack) {
-        subtackHashMap.put(subtack.getId(), subtack);
+        int idSub = subtack.getId();
+        epicHashMap.get(subtack.getEpicId()).addSubtask(idSub);
+        subtackHashMap.put(idSub, subtack);
     }
 
     public void save() {
@@ -106,7 +108,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
-    static String historyToString(HistoryManager manager) {
+    private static String historyToString(HistoryManager manager) {
         List<String> idTask = new ArrayList<>();
         for (Task task : manager.getHistory()) {
             idTask.add(String.valueOf(task.getId()));
@@ -114,7 +116,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return String.join(",", idTask);
     }
 
-    static List<Integer> historyFromString(String value) {
+    private static List<Integer> historyFromString(String value) {
         List<Integer> historyRestoration = new ArrayList<>();
         if (!value.isEmpty()) {
             for (String id : value.split(",")) {
@@ -124,8 +126,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return historyRestoration;
     }
 
+    protected void setNextId(int id) {
+        if (id > super.getNextId()) {
+            super.setNextId(++id);
+        }
+    }
+
     public static FileBackedTasksManager loadFromFile(File file) {
         FileBackedTasksManager manager = new FileBackedTasksManager(file);
+
         try (BufferedReader fileReader = new BufferedReader(new FileReader(file))) {
 
             while (fileReader.ready()) {
@@ -139,16 +148,21 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
                 Task task = fromString(line);
                 if (task instanceof Epic) {
+                    manager.setNextId(task.getId());
                     manager.createEpic((Epic) task);
 
                 } else if (task instanceof Subtack) {
+                    manager.setNextId(task.getId());
                     manager.createSub((Subtack) task);
                 } else {
+                    manager.setNextId(task.getId());
                     manager.createTask(task);
                 }
             }
 
+
             String historyLine = fileReader.readLine();
+
             if (historyLine != null) manager.addListHistory(historyFromString(historyLine));
 
         } catch (IOException e) {

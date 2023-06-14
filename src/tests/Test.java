@@ -31,13 +31,19 @@ public class Test {
         Epic epic2 = new Epic("Сходить в магазин", "гастраном");
         manager.addEpic(epic2);
 
+        Epic epic3 = new Epic("Погулять с собакой", "лойдом");
+
+
+
 
         manager.getEpicById(5);
         manager.getSubtackById(3);
 
         FileBackedTasksManager manager2 = FileBackedTasksManager.loadFromFile(file);
         manager2.getSubtackById(2);
-        System.out.println(manager2.getHistory());
+
+        manager2.addEpic(epic3);
+        System.out.println(manager2.getSubtackEpic(1));
 
 
     }

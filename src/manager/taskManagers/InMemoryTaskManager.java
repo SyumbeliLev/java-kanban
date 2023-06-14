@@ -13,6 +13,8 @@ import model.Task;
 public class InMemoryTaskManager implements TaskManager {
 
 
+
+
     private int nextId = 1;
 
     protected final Map<Integer, Task> taskHashMap = new HashMap<>();
@@ -20,6 +22,14 @@ public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Subtack> subtackHashMap = new HashMap<>();
     protected final HistoryManager historyManager = Managers.getDefaultHistory();
 
+
+    protected void setNextId(int nextId) {
+        this.nextId = nextId;
+    }
+
+    protected int getNextId() {
+        return nextId;
+    }
 
     @Override
     public List<Task> getHistory() {

@@ -5,12 +5,13 @@ import model.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
-    private static final String headCsv = "id,type,name,status,description,epic";
+    private static final String headCsv = "id,type,name,status,description,startTime,duration,endTime,epic";
     private final File file;
 
     public FileBackedTasksManager(File file) {
@@ -57,7 +58,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
 
     private String toString(Task task) {
-        String[] allArguments = {String.valueOf(task.getId()), getTaskType(task).toString(), task.getTitle(), task.getStatus().toString(), task.getDescription(), getEpicId(task)};
+        String[] allArguments = {String.valueOf(task.getId()), getTaskType(task).toString(), task.getTitle(), task.getStatus().toString(), task.getDescription(), String.valueOf(task.getStartTime()), String.valueOf(task.getDuration()), String.valueOf(task.getEndTime()), getEpicId(task)};
 
         return String.join(",", allArguments);
     }
@@ -80,31 +81,32 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     private static Task fromString(String value) {
         String[] argument = value.split(",");
 
-        String taskId = argument[0];
-        String taskType = argument[1];
+        Integer taskId = Integer.valueOf(argument[0]);
+        TaskType taskType = TaskType.valueOf(argument[1]);
         String taskTitle = argument[2];
-        String taskStatus = argument[3];
+        Progress taskStatus = Progress.valueOf(argument[3]);
         String taskDescription = argument[4];
+        LocalDateTime taskStartTime = LocalDateTime.parse(argument[5]);
+        Integer taskDuration = Integer.valueOf(argument[6]);
 
 
-        switch (taskType.toLowerCase()) {
-            case "task":
-                Task task = new Task(taskTitle, taskDescription, Progress.valueOf(taskStatus.toUpperCase()));
-                task.setId(Integer.parseInt(taskId));
+        switch (taskType) {
+            case TASK:
+                Task task = new Task(taskTitle, taskDescription, taskStatus,taskDuration,taskStartTime);
+                task.setId(taskId);
                 return task;
-            case "epic":
+            case EPIC:
                 Epic epic = new Epic(taskTitle, taskDescription);
-                epic.setId(Integer.parseInt(taskId));
-                epic.setStatus(Progress.valueOf(taskStatus.toUpperCase()));
+                epic.setId(taskId);
+                epic.setStatus(taskStatus);
                 return epic;
-            case "subtask":
-                String epicIdToSub = argument[5];
-
-                Subtack subtack = new Subtack(taskTitle, taskDescription, Progress.valueOf(taskStatus.toUpperCase()), Integer.parseInt(epicIdToSub));
-                subtack.setId(Integer.parseInt(taskId));
+            case SUBTASK:
+                Integer epicIdToSub = Integer.valueOf(argument[8]);
+                Subtack subtack = new Subtack(taskTitle,taskDescription,taskStatus,taskDuration,taskStartTime,epicIdToSub);
+                subtack.setId(taskId);
                 return subtack;
             default:
-                return new Task("null", "null", Progress.NEW);
+                throw new RuntimeException("Неверный формат");
         }
     }
 
@@ -216,10 +218,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public int addEpic(Epic epic) {
-        int idEpic = super.addEpic(epic);
+    public void addEpic(Epic epic) {
+        super.addEpic(epic);
         save();
-        return idEpic;
     }
 
     @Override
@@ -271,4 +272,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         super.removeSubtackById(id);
         save();
     }
+
+
 }

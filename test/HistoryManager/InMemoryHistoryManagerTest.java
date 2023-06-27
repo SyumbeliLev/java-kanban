@@ -17,10 +17,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class InMemoryHistoryManagerTest {
-    HistoryManager historyManager;
-    Task task;
-    Epic epic;
-    Subtack subtack;
+    private HistoryManager historyManager;
+    private Task task;
+    private Epic epic;
+    private Subtack subtack;
 
     @BeforeEach
     public void beforeEach() {
@@ -70,5 +70,6 @@ public class InMemoryHistoryManagerTest {
     @Test
     public void addHistoryTest() {
         assertNotNull(historyManager.getHistory(), "Не добавляет в историю");
+        assertEquals(List.of(task,epic,subtack),historyManager.getHistory(),"Содержит неверные элементы");
     }
 }

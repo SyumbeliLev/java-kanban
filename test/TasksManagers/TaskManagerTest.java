@@ -24,12 +24,12 @@ import static org.junit.jupiter.api.Assertions.*;
 abstract class TaskManagerTest<T extends TaskManager> {
 
     protected T taskManager;
+    private Task task1;
+    private Task task2;
+    private Epic epic1;
+    private Epic epic2;
 
-
-    Task task1;
-    Task task2;
-    Epic epic1;
-    Epic epic2;
+    final int NON_EXISTENT_ID = 99;
 
     @BeforeEach
     public void createTaskAndEpic() {
@@ -60,16 +60,16 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(trueHistory, taskManager.getHistory(), "Не верное запись после удаления");
 
         taskManager.removeAllTask();
-        taskManager.getEpicById(666);
-        assertEquals(List.of(), taskManager.getHistory(), "История после очистки не пуста");
+        taskManager.getEpicById(NON_EXISTENT_ID);
+        assertIterableEquals(List.of(), taskManager.getHistory(), "История после очистки не пуста");
     }
 
     @Test
     public void getTaskListTest() {
-        assertEquals(List.of(), taskManager.getTaskList(), "taskList не пустой");
+        assertIterableEquals(List.of(), taskManager.getTaskList(), "taskList не пустой");
 
         taskManager.addTask(task1);
-        assertEquals(List.of(task1), taskManager.getTaskList(), "В taskList не добавляются таски");
+        assertIterableEquals(List.of(task1), taskManager.getTaskList(), "В taskList не добавляются таски");
     }
 
     @Test
@@ -82,7 +82,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void getTaskById() {
-        assertNull(taskManager.getTaskById(777), "Возвращает не существующий task");
+        assertNull(taskManager.getTaskById(NON_EXISTENT_ID), "Возвращает не существующий task");
         taskManager.addTask(task1);
         assertEquals(task1, taskManager.getTaskById(1), "Возвращает не правильный task по id");
     }
@@ -117,7 +117,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.addTask(task2);
         taskManager.removeTaskById(1);
         final List<Task> tasks = taskManager.getTaskList();
-        assertEquals(List.of(task2), tasks, "не удаляет задачу по id");
+        assertIterableEquals(List.of(task2), tasks, "не удаляет задачу по id");
 
         taskManager.removeAllTask();
         assertNotNull(tasks, "не удаляет все задачи");
@@ -126,10 +126,10 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void getEpicListTest() {
-        assertEquals(List.of(), taskManager.getEpicList(), "epicList не пустой");
+        assertIterableEquals(List.of(), taskManager.getEpicList(), "epicList не пустой");
         taskManager.addEpic(epic1);
         taskManager.addEpic(epic2);
-        assertEquals(List.of(epic1, epic2), taskManager.getEpicList(), "В epicList не добавляются эпики");
+        assertIterableEquals(List.of(epic1, epic2), taskManager.getEpicList(), "В epicList не добавляются эпики");
     }
 
     @Test
@@ -145,17 +145,17 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         taskManager.removeEpicById(1);
         final List<Epic> epics = taskManager.getEpicList();
-        assertEquals(List.of(epic2), epics, "не удаляет epic по id");
-        assertEquals(List.of(subtack2, subtack3), taskManager.getSubtackList(), "Не удаляются подзадачи эпика при его удаление");
+        assertIterableEquals(List.of(epic2), epics, "не удаляет epic по id");
+        assertIterableEquals(List.of(subtack2, subtack3), taskManager.getSubtackList(), "Не удаляются подзадачи эпика при его удаление");
 
         taskManager.removeAllEpic();
-        assertNotNull(epics, "не удаляет все epic");
-        assertEquals(List.of(), taskManager.getSubtackList(), "Не удаляются подзадачи при удаление всех эпиков");
+        assertIterableEquals(List.of(), taskManager.getEpicList(), "не удаляет все epic");
+        assertIterableEquals(List.of(), taskManager.getSubtackList(), "Не удаляются подзадачи при удаление всех эпиков");
     }
 
     @Test
     public void getEpicByIdTest() {
-        assertNull(taskManager.getEpicById(777), "Возвращает не существующий epic");
+        assertNull(taskManager.getEpicById(NON_EXISTENT_ID), "Возвращает не существующий epic");
         taskManager.addEpic(epic1);
         assertEquals(epic1, taskManager.getEpicById(1), "Возвращает не правильный epic по id");
     }
@@ -171,7 +171,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         final List<Epic> epics = taskManager.getEpicList();
 
-        assertNotNull(epics, "Задачи на возвращаются.");
+        assertIterableEquals(List.of(epic1), epics, "Задачи на возвращаются.");
         assertEquals(1, epics.size(), "Неверное количество задач.");
         assertEquals(epic1, epics.get(0), "Задачи не совпадают.");
     }
@@ -187,9 +187,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void getSubtaskEpicTest() {
-        NullPointerException exp = assertThrows(NullPointerException.class, () -> {
-            taskManager.getSubtackEpic(666);
-        });
+        NullPointerException exp = assertThrows(NullPointerException.class, () -> taskManager.getSubtackEpic(NON_EXISTENT_ID));
         assertNull(exp.getMessage(), "Принимает не существующий epic");
 
         taskManager.addEpic(epic1);
@@ -199,8 +197,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.addSubtack(subtack1);
         taskManager.addSubtack(subtack2);
 
-        assertEquals(List.of(), taskManager.getSubtackEpic(2), "Возвращает не существующие subtask");
-        assertEquals(List.of(subtack1, subtack2), taskManager.getSubtackEpic(1), "Не правильно возвращает id subtask");
+        assertIterableEquals(List.of(), taskManager.getSubtackEpic(2), "Возвращает не существующие subtask");
+        assertIterableEquals(List.of(subtack1, subtack2), taskManager.getSubtackEpic(1), "Не правильно возвращает id subtask");
     }
 
     @Test
@@ -211,12 +209,12 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Subtack subtack2 = new Subtack("title", "description", Progress.NEW, 20, LocalDateTime.of(2022, 2, 1, 1, 1), epic1.getId());
         taskManager.addSubtack(subtack1);
         taskManager.addSubtack(subtack2);
-        assertEquals(List.of(subtack1, subtack2), taskManager.getSubtackList(), "В epicList не добавляются эпики");
+        assertIterableEquals(List.of(subtack1, subtack2), taskManager.getSubtackList(), "В epicList не добавляются эпики");
     }
 
     @Test
     public void getSubtaskById() {
-        assertNull(taskManager.getSubtackById(666), "Возвращает subtask c несуществующим Id");
+        assertNull(taskManager.getSubtackById(NON_EXISTENT_ID), "Возвращает subtask c несуществующим Id");
 
         taskManager.addEpic(epic1);
         Subtack subtack1 = new Subtack("title", "description", Progress.NEW, 20, LocalDateTime.of(2022, 2, 1, 1, 1), epic1.getId());
@@ -226,9 +224,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void removeSubtaskAllAndByIdTest() {
-        assertDoesNotThrow(() -> {
-            taskManager.removeSubtackById(666);
-        }, "Ошибки на удаление subtask с несуществующим id ");
+        assertDoesNotThrow(() -> taskManager.removeSubtackById(NON_EXISTENT_ID), "Ошибки на удаление subtask с несуществующим id ");
 
         taskManager.addEpic(epic2);
         Subtack subtack2 = new Subtack("title", "description", Progress.NEW, 20, LocalDateTime.of(2022, 1, 2, 2, 2), epic2.getId());
@@ -239,21 +235,19 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.addSubtack(subtack4);
 
         taskManager.removeSubtackById(4);
-        assertEquals(List.of(subtack2, subtack3), taskManager.getSubtackList(), "Не верно удаляет subtask по id");
+        assertIterableEquals(List.of(subtack2, subtack3), taskManager.getSubtackList(), "Не верно удаляет subtask по id");
 
         taskManager.removeAllSubtack();
-        assertEquals(List.of(), taskManager.getSubtackList(), "Не удаляются все subtask");
+        assertIterableEquals(List.of(), taskManager.getSubtackList(), "Не удаляются все subtask");
     }
 
 
     @Test
     public void addSubtaskTest() {
         taskManager.addEpic(epic1);
-        Subtack subtack1 = new Subtack("title", "description", Progress.NEW, 20, LocalDateTime.of(2022, 1, 2, 2, 2), 666);
+        Subtack subtack1 = new Subtack("title", "description", Progress.NEW, 20, LocalDateTime.of(2022, 1, 2, 2, 2), NON_EXISTENT_ID);
         Subtack subtack2 = new Subtack("title", "description", Progress.NEW, 20, LocalDateTime.of(2022, 2, 2, 2, 2), epic1.getId());
-        NullPointerException exp = assertThrows(NullPointerException.class, () -> {
-            taskManager.addSubtack(subtack1);
-        });
+        NullPointerException exp = assertThrows(NullPointerException.class, () -> taskManager.addSubtack(subtack1));
         assertNull(exp.getMessage(), "Создает subtask c несуществующим epicId");
 
         taskManager.addSubtack(subtack2);
@@ -264,8 +258,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
         final int subtaskId = subtack3.getId();
         final Task savedSubtask = taskManager.getSubtackById(subtaskId);
 
-        assertNotNull(savedSubtask, "Epic не найден.");
-        assertEquals(subtack3, savedSubtask, "epic не совпадаю.");
+        assertNotNull(savedSubtask, "subtask не найден.");
+        assertEquals(subtack3, savedSubtask, "subtask не совпадаю.");
 
         final List<Subtack> subtasks = taskManager.getSubtackList();
 
@@ -326,7 +320,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void getPrioritizedTasksTest() {
         taskManager.addTask(task1);
         taskManager.addTask(task2);
-        List<Task> prioritizedTasks = new ArrayList<Task>();
+        List<Task> prioritizedTasks = new ArrayList<>();
         prioritizedTasks.add(task1);
         prioritizedTasks.add(task2);
         List<Task> prioritizedTasksCreated = taskManager.getPrioritizedTasks();

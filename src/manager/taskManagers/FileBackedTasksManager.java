@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
@@ -81,13 +82,18 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     private static Task fromString(String value) {
         String[] argument = value.split(",");
 
-        Integer taskId = Integer.valueOf(argument[0]);
+        int taskId = Integer.parseInt(argument[0]);
         TaskType taskType = TaskType.valueOf(argument[1]);
         String taskTitle = argument[2];
         Progress taskStatus = Progress.valueOf(argument[3]);
         String taskDescription = argument[4];
-        LocalDateTime taskStartTime = LocalDateTime.parse(argument[5]);
-        Integer taskDuration = Integer.valueOf(argument[6]);
+
+        LocalDateTime taskStartTime;
+        if(!Objects.equals(argument[5], "null")){
+            taskStartTime = LocalDateTime.parse(argument[5]);
+        }else{taskStartTime = null;}
+
+        int taskDuration = Integer.parseInt(argument[6]);
 
 
         switch (taskType) {
@@ -101,7 +107,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 epic.setStatus(taskStatus);
                 return epic;
             case SUBTASK:
-                Integer epicIdToSub = Integer.valueOf(argument[8]);
+                int epicIdToSub = Integer.parseInt(argument[8]);
                 Subtack subtack = new Subtack(taskTitle,taskDescription,taskStatus,taskDuration,taskStartTime,epicIdToSub);
                 subtack.setId(taskId);
                 return subtack;

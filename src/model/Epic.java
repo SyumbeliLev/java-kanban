@@ -9,7 +9,7 @@ public class Epic extends Task {
     private LocalDateTime endTime;
 
     public Epic(String title, String description) {
-        super(title, description, Progress.NEW,0,LocalDateTime.now());
+        super(title, description, Progress.NEW,0,null);
     }
 
     public void setEndTime(LocalDateTime endTime) {

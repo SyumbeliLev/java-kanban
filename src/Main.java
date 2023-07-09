@@ -1,26 +1,23 @@
-import manager.taskManagers.FileBackedTasksManager;
-import model.Epic;
-import model.Progress;
-import model.Task;
 
-import java.io.File;
-import java.time.LocalDateTime;
+import com.google.gson.Gson;
+import manager.Managers;
+import manager.taskManagers.HttpTaskManager;
+
+import server.HttpTaskServer;
+import server.KVServer;
+import java.io.IOException;
+
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, InterruptedException {
 
-        File file = new File("save.csv");
+        new KVServer().start();
 
-        FileBackedTasksManager manager = new FileBackedTasksManager(file);
-        Task task1 = new Task("title", "description", Progress.NEW, 14, LocalDateTime.of(2003, 1, 1, 1, 1));
-        Epic epic1 = new Epic("title", "description");
-
-        manager.addTask(task1);
-        manager.addEpic(epic1);
-
-        FileBackedTasksManager manager1=FileBackedTasksManager.loadFromFile(file);
-        System.out.println(manager1.getTaskList());
-
+        HttpTaskManager manager = Managers.getDefault();
+        HttpTaskServer server = new HttpTaskServer(manager);
+        Gson gson = Managers.getGson();
+        server.start();
     }
 }
+

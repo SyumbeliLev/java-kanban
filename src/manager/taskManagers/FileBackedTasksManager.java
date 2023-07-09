@@ -13,21 +13,24 @@ import java.util.Objects;
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private static final String headCsv = "id,type,name,status,description,startTime,duration,endTime,epic";
-    private final File file;
+    private File file;
+
+    public FileBackedTasksManager() {
+    }
 
     public FileBackedTasksManager(File file) {
         this.file = file;
     }
 
-    private void createTask(Task task) {
+    protected void createTask(Task task) {
         taskHashMap.put(task.getId(), task);
     }
 
-    private void createEpic(Epic epic) {
+    protected void createEpic(Epic epic) {
         epicHashMap.put(epic.getId(), epic);
     }
 
-    private void createSub(Subtack subtack) {
+    protected void createSub(Subtack subtack) {
         int idSub = subtack.getId();
         epicHashMap.get(subtack.getEpicId()).addSubtask(idSub);
         subtackHashMap.put(idSub, subtack);
@@ -116,7 +119,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
-    private static String historyToString(HistoryManager manager) {
+    protected static String historyToString(HistoryManager manager) {
         List<String> idTask = new ArrayList<>();
         for (Task task : manager.getHistory()) {
             idTask.add(String.valueOf(task.getId()));

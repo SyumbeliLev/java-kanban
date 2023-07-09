@@ -41,8 +41,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
         if (task1.getStartTime().isEqual(task2.getStartTime())) {
             return 2;
-        }
-        return task1.getStartTime().compareTo(task2.getStartTime());
+        }else return task1.getStartTime().compareTo(task2.getStartTime());
     }
 
     @Override
@@ -58,10 +57,12 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeAllTask() { /* 2.2 Удаление всех tasks задач.*/
-        for (Integer taskId : taskHashMap.keySet()) {
-            historyManager.remove(taskId);
+        if (!taskHashMap.isEmpty()) {
+            for (Integer taskId : taskHashMap.keySet()) {
+                historyManager.remove(taskId);
+            }
+            taskHashMap.clear();
         }
-        taskHashMap.clear();
     }
 
     @Override
@@ -92,8 +93,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeTaskById(int id) { /* 2.6 Удаление по идентификатору.*/
-        taskHashMap.remove(id);
-        historyManager.remove(id);
+        if (taskHashMap.containsKey(id)) {
+            taskHashMap.remove(id);
+            historyManager.remove(id);
+        }
     }
 
     /*методы Epic*/
@@ -104,12 +107,13 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeAllEpic() { /* 2.2 Удаление всех Epic задач.*/
-        removeAllSubtack();
-        for (Map.Entry<Integer, Epic> epicEntry : epicHashMap.entrySet()) {
-            historyManager.remove(epicEntry.getKey());
+        if (!epicHashMap.isEmpty()) {
+            removeAllSubtack();
+            for (Map.Entry<Integer, Epic> epicEntry : epicHashMap.entrySet()) {
+                historyManager.remove(epicEntry.getKey());
+            }
+            epicHashMap.clear();
         }
-        epicHashMap.clear();
-
     }
 
     @Override
@@ -127,6 +131,7 @@ public class InMemoryTaskManager implements TaskManager {
         setEpicStartAndEndTime(epic);
         setStatusEpic(epic);
         epicHashMap.put(epic.getId(), epic);
+
     }
 
     private void setStatusEpic(Epic epic) {
@@ -162,7 +167,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeEpicById(int id) { /* 2.6 Удаление по идентификатору Epic.*/
-        if (!epicHashMap.isEmpty()) {
+        if (epicHashMap.containsKey(id)) {
             Epic epic = epicHashMap.remove(id);
             historyManager.remove(id);
             for (Integer idSub : epic.getSubtasksId()) {
@@ -174,11 +179,13 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public List<Subtack> getSubtackEpic(int id) { /*Получение списка всех подзадач определённого эпика.*/
-        Epic epic = epicHashMap.get(id);
         ArrayList<Subtack> list = new ArrayList<>();
-        for (Integer idSub : epic.getSubtasksId()) {
-            list.add(subtackHashMap.get(idSub));
-            historyManager.add(subtackHashMap.get(idSub));
+        if (!epicHashMap.isEmpty()) {
+            Epic epic = epicHashMap.get(id);
+            for (Integer idSub : epic.getSubtasksId()) {
+                list.add(subtackHashMap.get(idSub));
+                historyManager.add(subtackHashMap.get(idSub));
+            }
         }
         return list;
     }
@@ -192,18 +199,20 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeAllSubtack() { /* 2.2 Удаление всех Subtack задач.*/
-        for (Integer KeyEpic : epicHashMap.keySet()) {
-            Epic epic = epicHashMap.get(KeyEpic);
-            epic.removeListSubtasks();
-            setStatusEpic(epic);
-            setEpicStartAndEndTime(epic);
-        }
+        if (!subtackHashMap.isEmpty()) {
+            for (Integer KeyEpic : epicHashMap.keySet()) {
+                Epic epic = epicHashMap.get(KeyEpic);
+                epic.removeListSubtasks();
+                setStatusEpic(epic);
+                setEpicStartAndEndTime(epic);
+            }
 
-        for (Map.Entry<Integer, Subtack> subtackEntry : subtackHashMap.entrySet()) {
-            historyManager.remove(subtackEntry.getKey());
-            prioritizedTasks.remove(subtackEntry.getValue());
+            for (Map.Entry<Integer, Subtack> subtackEntry : subtackHashMap.entrySet()) {
+                historyManager.remove(subtackEntry.getKey());
+                prioritizedTasks.remove(subtackEntry.getValue());
+            }
+            subtackHashMap.clear();
         }
-        subtackHashMap.clear();
     }
 
     @Override
@@ -240,8 +249,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeSubtackById(int id) { /* 2.6 Удаление по идентификатору Subtack.*/
-        historyManager.remove(id);
         if (subtackHashMap.containsKey(id)) {
+            historyManager.remove(id);
+
             Subtack subtack = subtackHashMap.remove(id);
             prioritizedTasks.remove(subtack);
             int epicId = subtack.getEpicId();
@@ -289,8 +299,8 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public List<Task> getPrioritizedTasks() {
-        return new ArrayList<>(prioritizedTasks);
 
+        return new ArrayList<>(prioritizedTasks);
     }
 
     private void addTaskToPrioritizedTasks(Task task) {
@@ -303,8 +313,8 @@ public class InMemoryTaskManager implements TaskManager {
 
         for (int i = 1; i < prioritizedTasks.size(); i++) {
             Task prioritizedTask = prioritizedTasks.get(i);
-
             if (prioritizedTask.getStartTime().isBefore(prioritizedTasks.get(i - 1).getEndTime()))
+
                 throw new RuntimeException("Найдено пересечение " + prioritizedTasks.get(i) + " и " + prioritizedTasks.get(i - 1));
         }
     }

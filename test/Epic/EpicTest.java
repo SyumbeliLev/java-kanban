@@ -8,6 +8,7 @@ import model.Subtack;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,7 +19,7 @@ class EpicTest {
     private Epic epic;
 
     @BeforeEach
-    public void createManagerAndEpic() {
+    public void createManagerAndEpic() throws IOException, InterruptedException {
         manager = Managers.getDefault();
         epic = new Epic("title", "description");
         manager.addEpic(epic);

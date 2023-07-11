@@ -55,9 +55,9 @@ public class HttpTaskServerTest {
     }
 
     @BeforeEach
-    public void Before() throws IOException, InterruptedException {
-
-        manager = Managers.getDefault();
+    public void Before() throws IOException {
+        server = new HttpTaskServer();
+        manager = server.getManager();
 
         gson = Managers.getGson();
         manager.addTask(task1);
@@ -70,7 +70,6 @@ public class HttpTaskServerTest {
         manager.getSubtackById(4);
         manager.getSubtackById(5);
 
-        server = new HttpTaskServer(manager);
         server.start();
     }
 

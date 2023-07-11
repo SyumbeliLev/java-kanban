@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class InMemoryHistoryManagerTest {
     private HistoryManager historyManager;
@@ -71,5 +72,15 @@ public class InMemoryHistoryManagerTest {
     public void addHistoryTest() {
         assertNotNull(historyManager.getHistory(), "Не добавляет в историю");
         assertEquals(List.of(task,epic,subtack),historyManager.getHistory(),"Содержит неверные элементы");
+    }
+
+    @Test
+    public void historyDeduplicationTest(){
+        historyManager.add(task);
+        historyManager.add(task);
+        historyManager.add(epic);
+        assertEquals(List.of(subtack,task,epic),historyManager.getHistory());
+        assertEquals(3,historyManager.getHistory().size());
+
     }
 }

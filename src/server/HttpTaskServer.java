@@ -27,15 +27,11 @@ public class HttpTaskServer {
     private final Gson gson;
     private final TaskManager manager;
 
-
-    public HttpTaskServer(TaskManager manager) throws IOException {
-        this.manager = manager;
-        gson = Managers.getGson();
-        server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
-        server.createContext("/tasks", new handleTasks());
+    public TaskManager getManager() {
+        return manager;
     }
 
-    public HttpTaskServer() throws IOException, InterruptedException {
+    public HttpTaskServer() throws IOException {
         manager = Managers.getDefault();
         gson = Managers.getGson();
         server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
@@ -53,9 +49,9 @@ public class HttpTaskServer {
         System.out.println("Server stopped on port " + PORT);
     }
 
-    class handleTasks implements HttpHandler {
+    private class handleTasks implements HttpHandler {
         @Override
-        public void handle(HttpExchange exchange) throws IOException {
+        public void handle(HttpExchange exchange) {
             int taskId = 0;
             int rCode = 200;
             String response = null;
@@ -67,135 +63,140 @@ public class HttpTaskServer {
                 taskId = Integer.parseInt(exchange.getRequestURI().getQuery().substring(index + 1));
             }
 
-
-            switch (endpoint) {
-                case GET_HISTORY:
-                    response = gson.toJson(manager.getHistory());
-                    break;
-                case GET_PRIORITIZED_TASK:
-                    response = gson.toJson(manager.getPrioritizedTasks());
-                    break;
-                case GET_TASKS:
-                    response = gson.toJson(manager.getTaskList());
-                    break;
-                case GET_TASK_BY_ID:
-                    response = gson.toJson(manager.getTaskById(taskId));
-                    break;
-                case GET_EPICS:
-                    response = gson.toJson(manager.getEpicList());
-                    break;
-                case GET_EPIC_BY_ID:
-                    response = gson.toJson(manager.getEpicById(taskId));
-                    break;
-                case GET_SUBTASKS:
-                    response = gson.toJson(manager.getSubtackList());
-                    break;
-                case GET_SUBTASK_BY_ID:
-                    response = gson.toJson(manager.getSubtackById(taskId));
-                    break;
-                case GET_EPIC_SUBTASKS_ID:
-                    response = gson.toJson(manager.getSubtackEpic(taskId));
-                    break;
-
-                case DELETE_ALL_TASKS:
-                    manager.removeAllTask();
-                    response = "Все таски удалены";
-                    break;
-                case DELETE_TASK_BY_ID:
-                    manager.removeTaskById(taskId);
-                    response = "Задача с id = " + taskId + " удалена";
-                    break;
-                case DELETE_ALL_EPICS:
-                    manager.removeAllEpic();
-                    response = "Все эпики удалены";
-                    break;
-                case DELETE_EPIC_BY_ID:
-                    manager.removeEpicById(taskId);
-                    response = "Эпик с id = " + taskId + " удален";
-                    break;
-                case DELETE_ALL_SUBTASKS:
-                    manager.removeAllSubtack();
-                    response = "Все подзадачи удалены";
-                    break;
-                case DELETE_SUBTASK_BY_ID:
-                    manager.removeSubtackById(taskId);
-                    response = "Подзадача с id = " + taskId + " удалена";
-                    break;
-
-                case POST_ADD_OR_UPDATE_TASK:
-                    try {
-                        Task task = gson.fromJson(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8), Task.class);
-                        for (Task allTask : manager.getPrioritizedTasks()) {
-                            if (allTask.getId() == task.getId()) {
-                                exists = true;
-                                break;
-                            }
-                        }
-                        if (exists) {
-                            manager.updateTask(task);
-                            response = "Задача обновлена";
-                        } else {
-                            manager.addTask(task);
-                            response = "Задача добавлена";
-                        }
+            try {
+                switch (endpoint) {
+                    case GET_HISTORY:
+                        response = gson.toJson(manager.getHistory());
+                        break;
+                    case GET_PRIORITIZED_TASK:
+                        response = gson.toJson(manager.getPrioritizedTasks());
+                        break;
+                    case GET_TASKS:
+                        response = gson.toJson(manager.getTaskList());
+                        break;
+                    case GET_TASK_BY_ID:
+                        response = gson.toJson(manager.getTaskById(taskId));
+                        break;
+                    case GET_EPICS:
+                        response = gson.toJson(manager.getEpicList());
+                        break;
+                    case GET_EPIC_BY_ID:
+                        response = gson.toJson(manager.getEpicById(taskId));
+                        break;
+                    case GET_SUBTASKS:
+                        response = gson.toJson(manager.getSubtackList());
+                        break;
+                    case GET_SUBTASK_BY_ID:
+                        response = gson.toJson(manager.getSubtackById(taskId));
+                        break;
+                    case GET_EPIC_SUBTASKS_ID:
+                        response = gson.toJson(manager.getSubtackEpic(taskId));
                         break;
 
-                    } catch (JsonSyntaxException e) {
-                        writeResponse(exchange, "Получен некорректный JSON", 400);
-                    }
-                case POST_ADD_OR_UPDATE_EPIC:
-                    try {
-                        Epic epic = gson.fromJson(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8), Epic.class);
-
-                        for (Task allTask : manager.getPrioritizedTasks()) {
-                            if (allTask.getId() == epic.getId()) {
-                                exists = true;
-                                break;
-                            }
-                        }
-                        if (exists) {
-                            manager.updateEpic(epic);
-                            response = "Эпик обновлен";
-                        } else {
-                            manager.addEpic(epic);
-                            response = "Эпик добавлен";
-                        }
+                    case DELETE_ALL_TASKS:
+                        manager.removeAllTask();
+                        response = "Все таски удалены";
+                        break;
+                    case DELETE_TASK_BY_ID:
+                        manager.removeTaskById(taskId);
+                        response = "Задача с id = " + taskId + " удалена";
+                        break;
+                    case DELETE_ALL_EPICS:
+                        manager.removeAllEpic();
+                        response = "Все эпики удалены";
+                        break;
+                    case DELETE_EPIC_BY_ID:
+                        manager.removeEpicById(taskId);
+                        response = "Эпик с id = " + taskId + " удален";
+                        break;
+                    case DELETE_ALL_SUBTASKS:
+                        manager.removeAllSubtack();
+                        response = "Все подзадачи удалены";
+                        break;
+                    case DELETE_SUBTASK_BY_ID:
+                        manager.removeSubtackById(taskId);
+                        response = "Подзадача с id = " + taskId + " удалена";
                         break;
 
-                    } catch (JsonSyntaxException e) {
-                        writeResponse(exchange, "Получен некорректный JSON", 400);
-                    }
-                case POST_ADD_OR_UPDATE_SUBTASK:
-                    exists = false;
-                    try {
-                        Subtack subtack = gson.fromJson(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8), Subtack.class);
-
-                        for (Task allTask : manager.getPrioritizedTasks()) {
-                            if (allTask.getId() == subtack.getId()) {
-                                exists = true;
-                                break;
+                    case POST_ADD_OR_UPDATE_TASK:
+                        try {
+                            Task task = gson.fromJson(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8), Task.class);
+                            for (Task allTask : manager.getPrioritizedTasks()) {
+                                if (allTask.getId() == task.getId()) {
+                                    exists = true;
+                                    break;
+                                }
                             }
-                        }
-                        if (exists) {
-                            manager.updateSubtack(subtack);
-                            response = "Задача обновлена";
-                        } else {
-                            manager.addSubtack(subtack);
-                            response = "Задача добавлена";
-                        }
-                        break;
+                            if (exists) {
+                                manager.updateTask(task);
+                                response = "Задача обновлена";
+                            } else {
+                                manager.addTask(task);
+                                response = "Задача добавлена";
+                            }
+                            break;
 
-                    } catch (JsonSyntaxException e) {
-                        writeResponse(exchange, "Получен некорректный JSON", 400);
-                    }
-                case UNKNOWN:
-                    rCode = 405;
-                    response = "Этот запрос не обрабатывается";
+                        } catch (JsonSyntaxException e) {
+                            writeResponse(exchange, "Получен некорректный JSON", 400);
+                        }
+                    case POST_ADD_OR_UPDATE_EPIC:
+                        try {
+                            Epic epic = gson.fromJson(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8), Epic.class);
 
+                            for (Task allTask : manager.getPrioritizedTasks()) {
+                                if (allTask.getId() == epic.getId()) {
+                                    exists = true;
+                                    break;
+                                }
+                            }
+                            if (exists) {
+                                manager.updateEpic(epic);
+                                response = "Эпик обновлен";
+                            } else {
+                                manager.addEpic(epic);
+                                response = "Эпик добавлен";
+                            }
+                            break;
+
+                        } catch (JsonSyntaxException e) {
+                            writeResponse(exchange, "Получен некорректный JSON", 400);
+                        }
+                    case POST_ADD_OR_UPDATE_SUBTASK:
+                        exists = false;
+                        try {
+                            Subtack subtack = gson.fromJson(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8), Subtack.class);
+
+                            for (Task allTask : manager.getPrioritizedTasks()) {
+                                if (allTask.getId() == subtack.getId()) {
+                                    exists = true;
+                                    break;
+                                }
+                            }
+                            if (exists) {
+                                manager.updateSubtack(subtack);
+                                response = "Задача обновлена";
+                            } else {
+                                manager.addSubtack(subtack);
+                                response = "Задача добавлена";
+                            }
+                            break;
+
+                        } catch (JsonSyntaxException e) {
+                            writeResponse(exchange, "Получен некорректный JSON", 400);
+                        }
+                    case UNKNOWN:
+                        rCode = 405;
+                        response = "Этот запрос не обрабатывается";
+
+                }
+
+                writeResponse(exchange, response, rCode);
+
+            } catch (IOException e) {
+                System.out.println("Ошибка выполнения запроса :" + e.getMessage());
+            } finally {
+                exchange.close();
             }
-
-            writeResponse(exchange, response, rCode);
-
         }
 
         private void writeResponse(HttpExchange exchange, String responseString, int responseCode) throws IOException {

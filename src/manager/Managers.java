@@ -8,9 +8,7 @@ import manager.historyManagers.InMemoryHistoryManager;
 import manager.taskManagers.FileBackedTasksManager;
 import manager.taskManagers.HttpTaskManager;
 
-
 import java.io.File;
-import java.io.IOException;
 import java.time.LocalDateTime;
 
 public class Managers {
@@ -21,16 +19,18 @@ public class Managers {
         return new InMemoryHistoryManager();
     }
 
-    public static HttpTaskManager getDefault() throws IOException, InterruptedException {
-        return new HttpTaskManager("http://localhost:8078/");
+    public static HttpTaskManager getDefault() {
+        return new HttpTaskManager("http://localhost:8078/",false);
     }
+
     public static FileBackedTasksManager getDefaultFileBackedManager() {
         File file = new File("save.csv");
         return new FileBackedTasksManager(file);
     }
-    public static Gson getGson(){
+
+    public static Gson getGson() {
         GsonBuilder gsonBuilder = new GsonBuilder();
-                gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter());
+        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter());
         return gsonBuilder.create();
     }
 }

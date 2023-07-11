@@ -33,6 +33,10 @@ public class KVTaskClient {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             API_TOKEN = response.body();
+
+            if (response.statusCode() != 200) {
+                throw new IOException();
+            }
         } catch (InterruptedException | IOException e) {
             System.out.println("Во время выполнения регистрации токена возникла ошибка.\n" +
                     e.getMessage());
@@ -50,7 +54,10 @@ public class KVTaskClient {
                 .POST(body)
                 .build();
         try {
-            client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                throw new IOException();
+            }
         } catch (InterruptedException | IOException e) {
             System.out.println("Во время выполнения сохранения возникла ошибка.\n" +
                     e.getMessage());
@@ -67,6 +74,9 @@ public class KVTaskClient {
         HttpResponse<String> response = null;
         try {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                throw new IOException();
+            }
         } catch (InterruptedException | IOException e) {
             System.out.println("Во время выполнения загрузки возникла ошибка.\n" +
                     e.getMessage());

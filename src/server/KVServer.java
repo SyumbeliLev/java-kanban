@@ -44,6 +44,10 @@ public class KVServer {
                     System.out.println("Значение(value) для загрузки пустое. Значение(value) указывается в теле запроса");
                     h.sendResponseHeaders(400, 0);
                     return;
+                }if(!data.containsKey(key)){
+                    System.out.println("Значение(value) не найдено.");
+                    h.sendResponseHeaders(404, 0);
+                    return;
                 }
                 sendText(h, value);
                 System.out.println("Значение для ключа " + key + " успешно загружено!");

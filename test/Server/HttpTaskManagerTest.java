@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 public class HttpTaskManagerTest {
     @Test
-    public void loadFromServerTest() throws IOException, InterruptedException {
+    public void loadFromServerTest() throws IOException {
         new KVServer().start();
         HttpTaskManager httpManager = Managers.getDefault();
 
@@ -37,18 +37,13 @@ public class HttpTaskManagerTest {
         httpManager.getEpicById(3);
 
 
-        HttpTaskManager managerTask = HttpTaskManager.loadFromFile("tasks/task");
-        HttpTaskManager managerEpic = HttpTaskManager.loadFromFile("tasks/epic");
-        HttpTaskManager managerSubtask = HttpTaskManager.loadFromFile("tasks/subtask");
-        HttpTaskManager managerHistory = HttpTaskManager.loadFromFile("tasks/history");
-        HttpTaskManager managerPrioritizedTasks = HttpTaskManager.loadFromFile("tasks");
+        HttpTaskManager managerLoadFromServer =new HttpTaskManager("http://localhost:8078/",true);
 
-
-        assertIterableEquals(httpManager.getTaskList(), managerTask.getTaskList());
-        assertIterableEquals(httpManager.getEpicList(), managerEpic.getEpicList());
-        assertIterableEquals(httpManager.getSubtackList(), managerSubtask.getSubtackList());
-        assertIterableEquals(httpManager.getHistory(), managerHistory.getHistory());
-        assertIterableEquals(httpManager.getPrioritizedTasks(), managerPrioritizedTasks.getPrioritizedTasks());
+        assertIterableEquals(httpManager.getTaskList(), managerLoadFromServer.getTaskList());
+        assertIterableEquals(httpManager.getEpicList(), managerLoadFromServer.getEpicList());
+        assertIterableEquals(httpManager.getSubtackList(), managerLoadFromServer.getSubtackList());
+        assertIterableEquals(httpManager.getHistory(), managerLoadFromServer.getHistory());
+        assertIterableEquals(httpManager.getPrioritizedTasks(), managerLoadFromServer.getPrioritizedTasks());
 
     }
 }

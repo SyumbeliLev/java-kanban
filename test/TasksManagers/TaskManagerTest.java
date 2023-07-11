@@ -187,8 +187,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void getSubtaskEpicTest() {
-        NullPointerException exp = assertThrows(NullPointerException.class, () -> taskManager.getSubtackEpic(NON_EXISTENT_ID));
-        assertNull(exp.getMessage(), "Принимает не существующий epic");
+        assertEquals(List.of(),taskManager.getSubtackEpic(NON_EXISTENT_ID));
 
         taskManager.addEpic(epic1);
         taskManager.addEpic(epic2);
@@ -340,6 +339,29 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.addTask(task1);
         taskManager.getTaskById(1).setDuration(42);
         assertEquals(42, taskManager.getTaskById(1).getDuration());
+    }
+
+    @Test
+    public void checkEpicStatusWhenModifyingSubtasks(){
+        taskManager.addEpic(epic1);
+        Subtack subtack1 = new Subtack("title", "description", Progress.NEW, 20, LocalDateTime.of(2022, 1, 1, 1, 1), epic1.getId());
+        Subtack subtack2 = new Subtack("title", "description", Progress.NEW, 20, LocalDateTime.of(2022, 2, 1, 1, 1), epic1.getId());
+        Subtack subtack3 = new Subtack("title", "description", Progress.NEW, 20, LocalDateTime.of(2022, 3, 1, 1, 1), epic1.getId());
+        taskManager.addSubtack(subtack1);
+        taskManager.addSubtack(subtack2);
+        taskManager.addSubtack(subtack3);
+
+        assertEquals(Progress.NEW, epic1.getStatus());
+
+        subtack2.setStatus(Progress.DONE);
+        taskManager.updateSubtack(subtack2);
+        assertEquals(Progress.IN_PROGRESS, epic1.getStatus());
+
+        subtack1.setStatus(Progress.DONE);
+        subtack3.setStatus(Progress.DONE);
+        taskManager.updateSubtack(subtack1);
+        taskManager.updateSubtack(subtack3);
+        assertEquals(Progress.DONE, epic1.getStatus());
     }
 
 }
